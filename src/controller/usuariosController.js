@@ -1,4 +1,5 @@
 const db = require('../models/connection');
+
 const obtenerUsuarios = async (req, res) => {
     try {
         const result = await db.query("SELECT * FROM usuarios");
@@ -65,4 +66,23 @@ const eliminarUsuario = async (req, res) => {
         res.status(500).send("Error al eliminar usuario");
     }
 };
-module.exports = { obtenerUsuarios, obtenerUsuarioPorId, insertarUsuario, actualizarUsuario, actualizarParcialUsuario, eliminarUsuario };
+
+const loginUsuario = async (req, res) => {
+    try {
+        const { nombre, contra } = req.body;
+        const result = await db.query(
+            "SELECT * FROM usuarios WHERE nombre = $1 AND contra = $2",
+            [nombre, contra]
+        );
+        if (result.rows.length > 0) {
+            res.json({ success: true, usuario: result.rows[0] });
+        } else {
+            res.status(401).json({ success: false, mensaje: "Credenciales incorrectas" });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error al iniciar sesión");
+    }
+};
+
+module.exports = { obtenerUsuarios, obtenerUsuarioPorId, insertarUsuario, actualizarUsuario, actualizarParcialUsuario, eliminarUsuario, loginUsuario };
